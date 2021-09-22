@@ -4,9 +4,8 @@ using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 
-public class Game : MonoBehaviour {
-
-	
+public class Game : MonoBehaviour
+{
 	public delegate void GameEvent();
 	public static GameEvent onUndo;
 	public static GameEvent onReset;
@@ -20,52 +19,58 @@ public class Game : MonoBehaviour {
 	public static List<Mover> moversToMove = new List<Mover>();
 
 	public float moveTime = 0.18f; // time it takes to move 1 unit
-	public float fallTime = 0.1f; // time it takes to fall 1 unit
+	public float fallTime = 0.1f; // time it takes for 1 unit to fall
 
 	public static bool isMoving = false;
 	public int movingCount = 0;
 	public bool holdingUndo = false;
 	public static bool isPolyban = true;
 
-	void Awake() {
+	void Awake()
+	{
 		instance = this;
 		Application.targetFrameRate = 60;
-
-		if (Application.isEditor && !SaveData.initialized) {
-			SaveData.LoadGame(1);
-		}
 	}
 
-	void Start() {
+	void Start()
+	{
 		movers = FindObjectsOfType<Mover>();
 		State.Init();
-		foreach (Mover mover in movers) {
+		foreach (Mover mover in movers)
+		{
 			State.AddMover(mover);
 		}
 		State.AddToUndoStack();
 		isMoving = false;
 	}
 
-	public void EditorRefresh() {
+	public void EditorRefresh()
+	{
 		movers = FindObjectsOfType<Mover>();
 		walls = FindObjectsOfType<Wall>();
 	}
 
-	void Update() {
-		if (Input.GetKeyDown(KeyCode.Z)) {
+	void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.Z))
+		{
 			holdingUndo = true;
 			DoUndo();
 			DOVirtual.DelayedCall(0.75f, UndoRepeat);
-			
-		} else if (Input.GetKeyDown(KeyCode.R)) {
+
+		}
+		else if (Input.GetKeyDown(KeyCode.R))
+		{
 			DoReset();
 		}
-		if (Input.GetKeyUp(KeyCode.Z)) {
+		if (Input.GetKeyUp(KeyCode.Z))
+		{
 			StartCoroutine(StopUndoing());
 		}
 	}
 
-	public void Refresh() {
+	public void Refresh()
+	{
 		isMoving = false;
 		moversToMove.Clear();
 		movingCount = 0;
@@ -73,84 +78,104 @@ public class Game : MonoBehaviour {
 
 	/////////////////////////////////////////////////////////////////// UNDO / RESET
 
-    void DoReset() {
+	void DoReset()
+	{
 		DOTween.KillAll();
 		isMoving = false;
 		State.DoReset();
 		Refresh();
-		if (onReset != null) {
+		if (onReset != null)
+		{
 			onReset();
 		}
-    }
+	}
 
-	void DoUndo() {
-		if (State.undoIndex > 0) {
+	void DoUndo()
+	{
+		if (State.undoIndex > 0)
+		{
 			DOTween.KillAll();
-			if (isMoving) {
+			if (isMoving)
+			{
 				CompleteMove();
 			}
 			isMoving = false;
 			State.DoUndo();
 			Refresh();
-			if (onUndo != null) {
+			if (onUndo != null)
+			{
 				onUndo();
 			}
 		}
 	}
 
-	void UndoRepeat() {
-		if (Input.GetKey(KeyCode.Z) && holdingUndo) {
+	void UndoRepeat()
+	{
+		if (Input.GetKey(KeyCode.Z) && holdingUndo)
+		{
 			DoUndo();
 			DOVirtual.DelayedCall(0.075f, UndoRepeat);
 		}
 	}
 
-	IEnumerator StopUndoing() {
+	IEnumerator StopUndoing()
+	{
 		yield return WaitFor.EndOfFrame;
 		holdingUndo = false;
 	}
 
 	/////////////////////////////////////////////////////////////////// MOVE
 
-	public void MoveStart(Vector3 dir) {
+	public void MoveStart(Vector3 dir)
+	{
 		isMoving = true;
-		foreach (Mover m in moversToMove) {
+		foreach (Mover m in moversToMove)
+		{
 			movingCount++;
 			m.transform.DOMove(m.goalPosition, moveTime).OnComplete(MoveEnd).SetEase(Ease.Linear);
 		}
 	}
 
-	public void MoveEnd() {
+	public void MoveEnd()
+	{
 		movingCount--;
-		if (movingCount == 0) {
+		if (movingCount == 0)
+		{
 			PositionBuffer.Update();
 			FallStart();
 		}
 	}
-	
-	public void FallStart() {
+
+	public void FallStart()
+	{
 		isMoving = true;
 		movers = movers.OrderBy((c) => -c.transform.position.z).ToArray();
 
-		foreach (Mover m in movers) {
+		foreach (Mover m in movers)
+		{
 			m.FallStart();
 		}
-		if (movingCount == 0) {
+		if (movingCount == 0)
+		{
 			FallEnd();
 		}
 	}
 
-	public void FallEnd() {
-		if (movingCount == 0) {
+	public void FallEnd()
+	{
+		if (movingCount == 0)
+		{
 			PositionBuffer.Update();
 			Refresh();
 			CompleteMove();
 		}
 	}
 
-	public void CompleteMove() {
+	public void CompleteMove()
+	{
 		State.OnMoveComplete();
-		if (onMoveComplete != null) {
+		if (onMoveComplete != null)
+		{
 			onMoveComplete();
 		}
 	}
