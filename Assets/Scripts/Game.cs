@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.InputSystem;
 
 public class Game : MonoBehaviour
 {
@@ -25,12 +26,30 @@ public class Game : MonoBehaviour
 	public int movingCount = 0;
 	public bool holdingUndo = false;
 	public static bool isPolyban = true;
+	
+	public InputActionReference actionUndo;
+	public InputActionReference actionReset;
 
 	void Awake()
 	{
 		instance = this;
 		Application.targetFrameRate = 60;
 	}
+	
+	void OnEnable()
+	{
+		actionUndo.action.Enable();
+		actionReset.action.Enable();
+		
+		actionUndo.action.canceled += context => StartCoroutine(StopUndoing());
+	}
+	
+	void OnDisable()
+	{
+		actionUndo.action.Disable();
+		actionReset.action.Disable();
+	}
+	
 
 	void Start()
 	{
@@ -52,20 +71,15 @@ public class Game : MonoBehaviour
 
 	void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.Z))
+		if (actionUndo.action.triggered)
 		{
 			holdingUndo = true;
 			DoUndo();
 			DOVirtual.DelayedCall(0.75f, UndoRepeat);
-
 		}
-		else if (Input.GetKeyDown(KeyCode.R))
+		else if (actionReset.action.triggered)
 		{
 			DoReset();
-		}
-		if (Input.GetKeyUp(KeyCode.Z))
-		{
-			StartCoroutine(StopUndoing());
 		}
 	}
 
@@ -111,7 +125,7 @@ public class Game : MonoBehaviour
 
 	void UndoRepeat()
 	{
-		if (Input.GetKey(KeyCode.Z) && holdingUndo)
+		if (holdingUndo)
 		{
 			DoUndo();
 			DOVirtual.DelayedCall(0.075f, UndoRepeat);

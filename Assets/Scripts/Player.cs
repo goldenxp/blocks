@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : Mover
 {
@@ -6,10 +7,22 @@ public class Player : Mover
 	public static Player instance;
 	public static Player Get() { return instance; }
 	Vector3 direction = Vector3.zero;
+	
+	public InputActionReference actionMove;
 
 	void Awake()
 	{
 		instance = this;
+	}
+	
+	void OnEnable()
+	{
+		actionMove.action.Enable();
+	}
+	
+	void OnDisable()
+	{
+		actionMove.action.Disable();
 	}
 
 	void Update ()
@@ -25,9 +38,9 @@ public class Player : Mover
 
 	public void CheckInput()
 	{
-
-		float hor = Input.GetAxisRaw("Horizontal");
-		float ver = Input.GetAxisRaw("Vertical");
+		Vector2 axes = actionMove.action.ReadValue<Vector2>();
+		float hor = axes.x; 
+		float ver = axes.y;
 
 		if (hor == 0 && ver == 0)
 			return;
