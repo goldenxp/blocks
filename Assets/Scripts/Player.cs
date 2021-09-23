@@ -26,7 +26,7 @@ public class Player : Mover
 	}
 
 	void Update ()
-	{
+	{	
 		if (CanInput())
 			CheckInput();
 	}
@@ -47,20 +47,20 @@ public class Player : Mover
 
 		if (hor != 0 && ver != 0)
 		{
-			if (direction == Vector3.right || direction == Vector3.left)
+			if (direction == Game.Get().MoveLeft || direction == Game.Get().MoveRight)
 				hor = 0;
 			else
 				ver = 0;
 		}
-
+		
 		if (hor == 1)
-			direction = Vector3.right;
+			direction = Game.Get().MoveRight;
 		else if (hor == -1)
-			direction = Vector3.left;
+			direction = Game.Get().MoveLeft;
 		else if (ver == -1)
-			direction = Vector3.down;
+			direction = Game.Get().MoveDown;
 		else if (ver == 1)
-			direction = Vector3.up;
+			direction = Game.Get().MoveUp;
 
 		if (CanMove(direction))
 		{

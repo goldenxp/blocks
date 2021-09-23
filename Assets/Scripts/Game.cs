@@ -27,6 +27,13 @@ public class Game : MonoBehaviour
 	public bool holdingUndo = false;
 	public static bool isPolyban = true;
 	
+	public Vector3 fallDirection = Vector3.down;
+	public Vector3 MoveLeft { get; set; }
+	public Vector3 MoveRight { get; set; }
+	public Vector3 MoveUp { get; set; }
+	public Vector3 MoveDown { get; set; }
+	
+	
 	public InputActionReference actionUndo;
 	public InputActionReference actionReset;
 
@@ -34,6 +41,11 @@ public class Game : MonoBehaviour
 	{
 		instance = this;
 		Application.targetFrameRate = 60;
+		
+		MoveLeft = Vector3.left;
+		MoveRight = Vector3.right;
+		MoveUp = (fallDirection == Vector3.down) ? Vector3.forward : Vector3.up;
+		MoveDown = (fallDirection == Vector3.down) ? Vector3.back : Vector3.down;
 	}
 	
 	void OnEnable()

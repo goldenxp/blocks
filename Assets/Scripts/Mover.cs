@@ -5,7 +5,6 @@ using DG.Tweening;
 
 public class Mover : MonoBehaviour
 {
-
 	[HideInInspector] public Vector3 goalPosition;
 	public List<Tile> tiles = new List<Tile>();
 	[HideInInspector] public bool isFalling = false;
@@ -87,7 +86,7 @@ public class Mover : MonoBehaviour
 				isFalling = true;
 				Game.Get().movingCount++;
 			}
-			goalPosition = transform.position + Vector3.forward;
+			goalPosition = transform.position + Game.Get().fallDirection;
 			transform.DOMove(goalPosition, Game.Get().fallTime).OnComplete(FallAgain).SetEase(Ease.Linear);
 		} else
 			FallEnd();
@@ -118,8 +117,9 @@ public class Mover : MonoBehaviour
 	{
 		foreach (Tile tile in tiles)
 		{
-			if (Utils.Roughly(tile.pos.z, 0))
-				return true;
+			// Disabling this for now
+			// if (Utils.Roughly(tile.pos.y, 0))
+			//	return true;
 
 			if (GroundBelowTile(tile))
 				return true;
@@ -129,7 +129,7 @@ public class Mover : MonoBehaviour
 
 	bool GroundBelowTile(Tile tile)
 	{
-		Vector3Int posToCheck = Vector3Int.RoundToInt(tile.pos + Vector3.forward);
+		Vector3Int posToCheck = Vector3Int.RoundToInt(tile.pos + Game.Get().fallDirection);
 		if (PositionBuffer.WallIsAtPos(posToCheck))
 			return true;
 
